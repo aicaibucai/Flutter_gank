@@ -18,94 +18,114 @@ class TodayPage extends StatefulWidget {
 
 class _TodayPageState extends State<TodayPage>
     with AutomaticKeepAliveClientMixin {
-  TodayViewModel _TodayViewModel;
-
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     super.build(context);
-    return ChangeNotifierProvider<TodayViewModel>.value(
-        value: _TodayViewModel,
-        child: Scaffold(
-            appBar: AppBar(
-              centerTitle: true,
-              leading: IconButton(
-                  icon: Icon(Icons.date_range),
-                  onPressed: () {
-                    selectDayInfo();
-                  }),
-              title: Consumer<TodayViewModel>(builder: (_, model, widget) {
-                return Text(model.title);
-              }),
-            ),
-            body: Consumer<TodayViewModel>(builder: (_, model, widget) {
-              Widget child;
-              switch (model.status) {
-                case BaseViewModel.NORMAL:
-                  child = Container(
-                    child: CustomScrollView(
-                      slivers: <Widget>[
-                        SliverToBoxAdapter(
-                          child: Container(
-                              child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: generateClosedTag(model),
-                            ),
-                          )),
-                        ),
-                        SliverPadding(
-                          padding: EdgeInsets.only(top: 10),
-                          sliver: SliverList(
-                              delegate: SliverChildBuilderDelegate(
-                                  (buildcontext, index) {
-                            return ContentItemWidget(model.content[index]);
-                          }, childCount: model.content.length)),
-                        )
-                      ],
-                      controller: ScrollController(),
-                    ),
-                  );
-                  break;
-                case BaseViewModel.ERROR:
-                case BaseViewModel.NETWORK_ERROR:
-                  child = Center(
-                    child: Text("Error"),
-                  );
-                  break;
-                case BaseViewModel.INIT:
-                  child = Container();
-                  break;
-                case BaseViewModel.LOADING:
-                  child = Center(
-                    child: CircularProgressIndicator(),
-                  );
-                  break;
-                case BaseViewModel.EMPTY:
-                  child = Center(
-                      child: Container(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Image.asset("assets/images/empty_icon.png"),
-                        Text(
-                          "没有干货哦!",
-                          style: TextStyle(color: Colors.blue),
-                        ),
-                      ],
-                    ),
-                  ));
-                  break;
-              }
-              return RefreshIndicator(
-                  child: child, onRefresh: () async => await model.loadToday());
-            })));
+    return ChangeNotifierProvider<TodayViewModel>(
+        create: (_)=>TodayViewModel()..initData(),
+        child: Builder(builder: (todayBuild){
+          TodayViewModel viewModel=Provider.of<TodayViewModel>(todayBuild);
+          TodayModel model=viewModel.model;
+          return Scaffold(
+              appBar: AppBar(
+                centerTitle: true,
+                leading: IconButton(
+                    icon: Icon(Icons.date_range),
+                    onPressed: () {
+                      selectDayInfo(viewModel);
+                    }),
+                title: Text(model.title),
+              ),
+              body: Consumer<TodayViewModel>(builder: (_, model, widget) {
+                Widget child;
+                switch (model.status) {
+                  case BaseViewModel.NORMAL:
+                    child = Container(
+                      child: CustomScrollView(
+                        slivers: <Widget>[
+                          SliverToBoxAdapter(
+                            child: Container(
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: generateClosedTag(model),
+                                  ),
+                                )),
+                          ),
+                          SliverPadding(
+                            padding: EdgeInsets.only(top: 10),
+                            sliver: SliverList(
+                                delegate: SliverChildBuilderDelegate(
+                                        (buildcontext, index) {
+                                      return ContentItemWidget(model.model.content[index]);
+                                    }, childCount: model.model.content.length)),
+                          )
+                        ],
+                        controller: ScrollController(),
+                      ),
+                    );
+                    break;
+                  case BaseViewModel.ERROR:
+                    child = Center(
+                      child: Text("Error"),
+                    );
+                    break;
+                  case BaseViewModel.NETWORK_ERROR:
+                    child = Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Text("网络错误，请点击重试按钮重试。"),
+                          MaterialButton(
+                            onPressed: () {
+                              model.loadToday();
+                            },
+                            child: Text("重试",style: TextStyle(color: Colors.white),),
+                            color:Colors.blue,
+                            shape: RoundedRectangleBorder(
+                                side: BorderSide.none,
+                                borderRadius:
+                                BorderRadius.all(Radius.circular(10))),
+                          )
+                        ],
+                      ),
+                    );
+                    break;
+                  case BaseViewModel.INIT:
+                    child = Container();
+                    break;
+                  case BaseViewModel.LOADING:
+                    child = Center(
+                      child: CircularProgressIndicator(),
+                    );
+                    break;
+                  case BaseViewModel.EMPTY:
+                    child = Center(
+                        child: Container(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Image.asset("assets/images/empty_icon.png"),
+                              Text(
+                                "没有干货哦!",
+                                style: TextStyle(color: Colors.blue),
+                              ),
+                            ],
+                          ),
+                        ));
+                    break;
+                }
+                return RefreshIndicator(
+                    child: child, onRefresh: () async => await model.loadToday());
+              }));
+        }));
   }
 
   List<Widget> generateExpendTag(TodayViewModel model) {
     List<Widget> tags = List();
-    model.category.forEach((key, value) {
-      if (key == model.allSelectTag) {
+    model.model.category.forEach((key, value) {
+      if (key == model.model.allSelectTag) {
         tags.add(Container(
           padding: EdgeInsets.only(
             left: 5,
@@ -126,7 +146,7 @@ class _TodayPageState extends State<TodayPage>
             label: Text(key),
             selected: value,
             onSelected: (bool) {
-              if (!(!bool && model.SelectSize == 1)) {
+              if (!(!bool && model.model.SelectSize == 1)) {
                 model.selectTag(key, bool);
               }
             },
@@ -140,8 +160,8 @@ class _TodayPageState extends State<TodayPage>
 
   List<Widget> generateClosedTag(TodayViewModel model) {
     List<Widget> tags = List();
-    model.category.forEach((key, value) {
-      if (key == model.allSelectTag) {
+    model.model.category.forEach((key, value) {
+      if (key == model.model.allSelectTag) {
         tags.add(Container(
           padding: EdgeInsets.only(
             left: 5,
@@ -162,7 +182,7 @@ class _TodayPageState extends State<TodayPage>
             label: Text(key),
             selected: value,
             onSelected: (bool) {
-              if (!(!bool && model.SelectSize == 1)) {
+              if (!(!bool && model.model.SelectSize == 1)) {
                 model.selectTag(key, bool);
               }
             },
@@ -177,25 +197,25 @@ class _TodayPageState extends State<TodayPage>
   @override
   void initState() {
     super.initState();
-    _TodayViewModel = TodayViewModel()..initData();
   }
 
-  void selectDayInfo() {
+  void selectDayInfo(TodayViewModel viewModel) {
+    TodayModel model=viewModel.model;
     showDatePicker(
       context: context,
-      initialDate: _TodayViewModel.selectDate,
+      initialDate: model.selectDate,
       firstDate: DateTime(2015, 08, 06),
       lastDate: DateTime.now(),
     ).then((dt) {
       if (dt.difference(DateTime.now()).inDays == 0) {
-        _TodayViewModel.isToday = true;
+        model.isToday = true;
         var now = DateTime.now();
-        _TodayViewModel.selectDate = DateTime(now.year, now.month, now.day);
-        _TodayViewModel.loadToday();
+        model.selectDate = DateTime(now.year, now.month, now.day);
+        viewModel.loadToday();
       } else {
-        _TodayViewModel.isToday = false;
-        _TodayViewModel.selectDate = dt;
-        _TodayViewModel.loadDate(dt);
+        model.isToday = false;
+        model.selectDate = dt;
+        viewModel.loadDate(dt);
       }
     }).catchError((error) {
       print("ShowDatePickError${error.toString()}");

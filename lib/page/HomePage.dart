@@ -22,7 +22,8 @@ class HomeSate extends State<HomePage> {
   Widget build(BuildContext context) {
     ThemeData themeData = Theme.of(context);
     // TODO: implement build
-    return ChangeNotifierProvider.value(
+    return
+      ChangeNotifierProvider.value(
       value: _homeModel
         ..initData()
         ..context = context
