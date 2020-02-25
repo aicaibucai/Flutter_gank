@@ -7,7 +7,6 @@ class BaseViewModel with ChangeNotifier {
   static const int INIT = 0;
   static const int ERROR = -1;
   static const int NETWORK_ERROR = -2;
-
   int _status = INIT;
 
   int get status => _status;

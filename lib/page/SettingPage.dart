@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_gank_app/Config/ThemeConfig.dart';
 import 'package:flutter_gank_app/viewmodel/ThemeViewModel.dart';
 import 'package:provider/provider.dart';
 
@@ -69,7 +70,6 @@ class ChangeTheme extends Dialog {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    List<Color> colors = ThemeViewModel.colors;
     return Center(
       child: Container(
         width: 400,
@@ -82,10 +82,10 @@ class ChangeTheme extends Dialog {
               crossAxisSpacing: 1),
           itemBuilder: (bContext, index) {
             return Builder(builder: (c) {
-              return ThemeSelect(colors[index]);
+              return ThemeSelect(ThemeConfig.themeModels[index]);
             });
           },
-          itemCount: colors.length,
+          itemCount: ThemeConfig.themeModels.length,
         ),
       ),
     );
@@ -93,10 +93,10 @@ class ChangeTheme extends Dialog {
 }
 
 class ThemeSelect extends StatefulWidget {
-  Color _color;
+  ThemeModel _themeModel;
 
   ThemeSelect(
-    this._color,
+    this._themeModel,
   );
 
   @override
@@ -114,17 +114,17 @@ class ThemeSelectState extends State<ThemeSelect> {
       child: Stack(
         children: <Widget>[
           Container(
-            color: widget._color,
+            color: widget._themeModel.appBarTheme,
           ),
           Consumer<ThemeViewModel>(
             builder: (_, c, child) {
-              bool select = (widget._color == c.appBarTheme) ?? false;
+              bool select = (widget._themeModel == c.themeModel) ?? false;
               return Offstage(
                 offstage: !select,
                 child: Align(
                   child: Icon(
                     CupertinoIcons.check_mark_circled_solid,
-                    color: reverseColor(widget._color),
+                    color: reverseColor(widget._themeModel.appBarTheme),
                   ),
                   alignment: Alignment.bottomRight,
                 ),
@@ -134,8 +134,8 @@ class ThemeSelectState extends State<ThemeSelect> {
         ],
       ),
       onTap: () {
-        Provider.of<ThemeViewModel>(context, listen: false).appBarTheme =
-            widget._color;
+        Provider.of<ThemeViewModel>(context, listen: false).themeModel =
+           widget._themeModel;
       },
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gank_app/net/entity/TodayEntity.dart';
 import 'package:flutter_gank_app/view/ContentItemWidget.dart';
 import 'package:flutter_gank_app/viewmodel/BaseViewModel.dart';
 import 'package:flutter_gank_app/viewmodel/HomeViewModel.dart';
@@ -18,28 +19,39 @@ class TodayPage extends StatefulWidget {
 
 class _TodayPageState extends State<TodayPage>
     with AutomaticKeepAliveClientMixin {
+  TodayViewModel _viewModel;
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     super.build(context);
-    return ChangeNotifierProvider<TodayViewModel>(
-        create: (_)=>TodayViewModel()..initData(),
-        child: Builder(builder: (todayBuild){
-          TodayViewModel viewModel=Provider.of<TodayViewModel>(todayBuild);
-          TodayModel model=viewModel.model;
+    return ChangeNotifierProvider<TodayViewModel>.value(
+        value: _viewModel..initData(),
+        child: Builder(builder: (todayBuild) {
+//          TodayViewModel viewModel = Provider.of<TodayViewModel>(todayBuild);
+          print("Viewmodel重绘${DateTime.now().millisecondsSinceEpoch}");
           return Scaffold(
               appBar: AppBar(
                 centerTitle: true,
                 leading: IconButton(
                     icon: Icon(Icons.date_range),
                     onPressed: () {
-                      selectDayInfo(viewModel);
+                      selectDayInfo(_viewModel);
                     }),
-                title: Text(model.title),
+                title: Selector<TodayViewModel, String>(
+                    selector: (sContext, model) {
+                  return model.title;
+                }, builder: (_, title, widget) {
+                  print("title重绘${DateTime.now().millisecondsSinceEpoch}");
+                  return Text(title);
+                }),
               ),
-              body: Consumer<TodayViewModel>(builder: (_, model, widget) {
+              body: Selector<TodayViewModel, int>(selector: (sContext, model) {
+                return model.status;
+              }, builder: (_, status, widget) {
+                print("status重绘${DateTime.now().millisecondsSinceEpoch}");
                 Widget child;
-                switch (model.status) {
+                switch (status) {
                   case BaseViewModel.NORMAL:
                     child = Container(
                       child: CustomScrollView(
@@ -47,20 +59,26 @@ class _TodayPageState extends State<TodayPage>
                           SliverToBoxAdapter(
                             child: Container(
                                 child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Row(
-                                    children: generateClosedTag(model),
-                                  ),
-                                )),
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: generateClosedTag(_viewModel),
+                              ),
+                            )),
                           ),
-                          SliverPadding(
-                            padding: EdgeInsets.only(top: 10),
-                            sliver: SliverList(
-                                delegate: SliverChildBuilderDelegate(
+                          Consumer<TodayViewModel>(
+                            builder: (_, model, widget) {
+                              print(
+                                  "ListView重绘${DateTime.now().millisecondsSinceEpoch}");
+                              return SliverPadding(
+                                padding: EdgeInsets.only(top: 10),
+                                sliver: SliverList(
+                                    delegate: SliverChildBuilderDelegate(
                                         (buildcontext, index) {
-                                      return ContentItemWidget(model.model.content[index]);
-                                    }, childCount: model.model.content.length)),
-                          )
+                                  return ContentItemWidget(model.content[index]);
+                                }, childCount: model.content.length)),
+                              );
+                            },
+                          ),
                         ],
                         controller: ScrollController(),
                       ),
@@ -79,14 +97,17 @@ class _TodayPageState extends State<TodayPage>
                           Text("网络错误，请点击重试按钮重试。"),
                           MaterialButton(
                             onPressed: () {
-                              model.loadToday();
+                              _viewModel.loadToday();
                             },
-                            child: Text("重试",style: TextStyle(color: Colors.white),),
-                            color:Colors.blue,
+                            child: Text(
+                              "重试",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            color: Colors.blue,
                             shape: RoundedRectangleBorder(
                                 side: BorderSide.none,
                                 borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
+                                    BorderRadius.all(Radius.circular(10))),
                           )
                         ],
                       ),
@@ -103,92 +124,111 @@ class _TodayPageState extends State<TodayPage>
                   case BaseViewModel.EMPTY:
                     child = Center(
                         child: Container(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Image.asset("assets/images/empty_icon.png"),
-                              Text(
-                                "没有干货哦!",
-                                style: TextStyle(color: Colors.blue),
-                              ),
-                            ],
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Image.asset("assets/images/empty_icon.png"),
+                          Text(
+                            "没有干货哦!",
+                            style: TextStyle(color: Colors.blue),
                           ),
-                        ));
+                        ],
+                      ),
+                    ));
                     break;
                 }
                 return RefreshIndicator(
-                    child: child, onRefresh: () async => await model.loadToday());
+                    child: child,
+                    onRefresh: () async =>
+                        await _viewModel.loadToday(isInit: false));
               }));
         }));
   }
 
   List<Widget> generateExpendTag(TodayViewModel model) {
     List<Widget> tags = List();
-    model.model.category.forEach((key, value) {
-      if (key == model.model.allSelectTag) {
-        tags.add(Container(
-          padding: EdgeInsets.only(
-            left: 5,
-          ),
-          child: ChoiceChip(
-            label: Text(key),
-            selected: value,
-            onSelected: (bool) {
-              model.selectAll();
-            },
-            padding: EdgeInsets.only(left: 15, right: 15),
-          ),
-        ));
+    model.category.forEach((key, value) {
+      if (key == model.allSelectTag) {
+        tags.add(Selector<TodayViewModel, bool>(builder: (_, vs, widget) {
+          return Container(
+            padding: EdgeInsets.only(
+              left: 5,
+            ),
+            child: ChoiceChip(
+              label: Text(key),
+              selected: vs,
+              onSelected: (bool) {
+                model.selectAll();
+              },
+              padding: EdgeInsets.only(left: 15, right: 15),
+            ),
+          );
+        }, selector: (sContext, model) {
+          return model.category[key];
+        }));
       } else {
-        tags.add(Container(
-          padding: EdgeInsets.only(left: 10),
-          child: ChoiceChip(
-            label: Text(key),
-            selected: value,
-            onSelected: (bool) {
-              if (!(!bool && model.model.SelectSize == 1)) {
-                model.selectTag(key, bool);
-              }
-            },
-            padding: EdgeInsets.only(left: 15, right: 15),
-          ),
-        ));
+        tags.add(Selector<TodayViewModel, bool>(builder: (_, vs, widget) {
+          return Container(
+            padding: EdgeInsets.only(left: 10),
+            child: ChoiceChip(
+              label: Text(key),
+              selected: vs,
+              onSelected: (bool) {
+                if (!(!bool && model.SelectSize == 1)) {
+                  model.selectTag(key, bool);
+                }
+              },
+              padding: EdgeInsets.only(left: 15, right: 15),
+            ),
+          );
+        }, selector: (sContext, model) {
+          return model.category[key];
+        }));
       }
     });
     return tags;
   }
 
-  List<Widget> generateClosedTag(TodayViewModel model) {
+  List<Widget> generateClosedTag(TodayViewModel viewModel) {
+    print("Tag重绘${DateTime.now().millisecondsSinceEpoch}");
     List<Widget> tags = List();
-    model.model.category.forEach((key, value) {
-      if (key == model.model.allSelectTag) {
-        tags.add(Container(
-          padding: EdgeInsets.only(
-            left: 5,
-          ),
-          child: ChoiceChip(
-            label: Text(key),
-            selected: value,
-            onSelected: (bool) {
-              model.selectAll();
-            },
-            padding: EdgeInsets.only(left: 15, right: 15),
-          ),
-        ));
+    viewModel.category.forEach((key, value) {
+      if (key == viewModel.allSelectTag) {
+        tags.add(Selector<TodayViewModel, bool>(builder: (_, vs, widget) {
+          return Container(
+            padding: EdgeInsets.only(
+              left: 5,
+            ),
+            child: ChoiceChip(
+              label: Text(key),
+              selected: vs,
+              onSelected: (bool) {
+                viewModel.selectAll();
+              },
+              padding: EdgeInsets.only(left: 15, right: 15),
+            ),
+          );
+        }, selector: (sContext, model) {
+          return model.category[key];
+        }));
       } else {
-        tags.add(Container(
-          padding: EdgeInsets.only(left: 10),
-          child: ChoiceChip(
-            label: Text(key),
-            selected: value,
-            onSelected: (bool) {
-              if (!(!bool && model.model.SelectSize == 1)) {
-                model.selectTag(key, bool);
-              }
-            },
-            padding: EdgeInsets.only(left: 15, right: 15),
-          ),
-        ));
+        tags.add(Selector<TodayViewModel, bool>(builder: (_, vs, widget) {
+          return Container(
+            padding: EdgeInsets.only(left: 10),
+            child: ChoiceChip(
+              label: Text(key),
+              selected: vs,
+              onSelected: (bool) {
+                if (!(!bool && viewModel.SelectSize == 1)) {
+                  viewModel.selectTag(key, bool);
+                }
+              },
+              padding: EdgeInsets.only(left: 15, right: 15),
+            ),
+          );
+        }, selector: (sContext, model) {
+          return model.category[key];
+        }));
       }
     });
     return tags;
@@ -197,10 +237,10 @@ class _TodayPageState extends State<TodayPage>
   @override
   void initState() {
     super.initState();
+    _viewModel = TodayViewModel();
   }
 
-  void selectDayInfo(TodayViewModel viewModel) {
-    TodayModel model=viewModel.model;
+  void selectDayInfo(TodayViewModel model) {
     showDatePicker(
       context: context,
       initialDate: model.selectDate,
@@ -211,11 +251,11 @@ class _TodayPageState extends State<TodayPage>
         model.isToday = true;
         var now = DateTime.now();
         model.selectDate = DateTime(now.year, now.month, now.day);
-        viewModel.loadToday();
+        model.loadToday();
       } else {
         model.isToday = false;
         model.selectDate = dt;
-        viewModel.loadDate(dt);
+        model.loadDate(dt);
       }
     }).catchError((error) {
       print("ShowDatePickError${error.toString()}");

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'Config/ThemeConfig.dart';
 import 'page/HomePage.dart';
 
 import 'package:provider/provider.dart';
@@ -9,7 +10,7 @@ import 'viewmodel/ThemeViewModel.dart';
 void main() => runApp(MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => ThemeViewModel(),
+          create: (_) => ThemeViewModel(ThemeConfig.themeModels[5]),
         ),
       ],
       child: MyApp(),
@@ -25,9 +26,9 @@ class MyApp extends StatelessWidget {
           title: 'Flutter Demo',
           initialRoute: "/",
           theme: ThemeData(
-            appBarTheme: AppBarTheme(color: model.appBarTheme),
-            primarySwatch: model.primarySwatch,
-            primaryColor: model.primaryColor,
+            appBarTheme: AppBarTheme(color: model.themeModel.appBarTheme),
+//            primarySwatch: model.themeModel.primarySwatch,
+            primaryColor: model.themeModel.primaryColor,
           ),
           home: HomePage(),
         );

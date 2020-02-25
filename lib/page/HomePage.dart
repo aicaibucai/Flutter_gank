@@ -30,15 +30,16 @@ class HomeSate extends State<HomePage> {
         ..initPage(),
       child: Scaffold(
           body: PageView.builder(
+            physics: NeverScrollableScrollPhysics(),
             itemBuilder: (context, index) {
               return _homeModel.pages[index];
             },
             itemCount: _homeModel.pages.length,
-            onPageChanged: (index) {
-              if (index != _homeModel.currentIndex) {
-                _homeModel.selectIndex(index, false);
-              }
-            },
+//            onPageChanged: (index) {
+//              if (index != _homeModel.currentIndex) {
+//                _homeModel.selectIndex(index, false);
+//              }
+//            },
             controller: _homeModel.pageControl,
           ),
           bottomNavigationBar:
