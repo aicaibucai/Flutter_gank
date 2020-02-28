@@ -43,7 +43,7 @@ class TodayViewModel extends BaseViewModel {
   }
 
   void refreshToday() {
-     content.clear();
+    content=List<TodayEntity>();
     title = isToday ? "今日" : selectDate.toSimpleDate();
     List<String> tags = List();
     _category.forEach((key, value) {

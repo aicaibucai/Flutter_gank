@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_gank_app/Config/ThemeConfig.dart';
+import 'package:flutter_gank_app/view/ColorPickWidget.dart';
 import 'package:flutter_gank_app/viewmodel/ThemeViewModel.dart';
 import 'package:provider/provider.dart';
 
@@ -36,7 +37,7 @@ class SettingState extends State<SettingPage> {
                   children: <Widget>[
                     Expanded(
                       child: Text(
-                        "标题栏颜色",
+                        "主题颜色",
                         style: TextStyle(fontSize: 18),
                       ),
                     ),
@@ -56,11 +57,53 @@ class SettingState extends State<SettingPage> {
                   child: ChangeTheme(),
                 );
               },
+            ),
+            InkWell(
+              child: Container(
+                decoration: BoxDecoration(color: Colors.white),
+                padding:
+                    EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        "自定义颜色",
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ),
+                    Container(
+                      width: 40,
+                      height: 40,
+                      color: themeData.appBarTheme.color,
+                    )
+                  ],
+                ),
+              ),
+              onTap: () {
+//                print(
+//                    "ThemeViewModel:${Provider.of<ThemeViewModel>(context, listen: false).primaryColor}");
+                showDialog(
+                  context: context,
+                  child: ColorPickDialog(),
+                );
+              },
             )
           ],
         ),
       ),
     );
+  }
+}
+
+class ColorPickDialog extends Dialog {
+  @override
+  Widget build(BuildContext context) {
+    return Center(child: Container(
+      width: 400,
+      height: 400,
+      child: CircleColorPickWidget(),
+      decoration: BoxDecoration(color: Colors.white),
+    ),);
   }
 }
 
@@ -135,7 +178,7 @@ class ThemeSelectState extends State<ThemeSelect> {
       ),
       onTap: () {
         Provider.of<ThemeViewModel>(context, listen: false).themeModel =
-           widget._themeModel;
+            widget._themeModel;
       },
     );
   }

@@ -26,9 +26,10 @@ class _TodayPageState extends State<TodayPage>
     // TODO: implement build
     super.build(context);
     return ChangeNotifierProvider<TodayViewModel>.value(
-        value: _viewModel..initData(),
+        value: _viewModel.status == BaseViewModel.INIT
+            ? (_viewModel..initData())
+            : _viewModel,
         child: Builder(builder: (todayBuild) {
-//          TodayViewModel viewModel = Provider.of<TodayViewModel>(todayBuild);
           print("Viewmodel重绘${DateTime.now().millisecondsSinceEpoch}");
           return Scaffold(
               appBar: AppBar(
@@ -65,8 +66,11 @@ class _TodayPageState extends State<TodayPage>
                               ),
                             )),
                           ),
-                          Consumer<TodayViewModel>(
-                            builder: (_, model, widget) {
+                          Selector<TodayViewModel, List<TodayEntity>>(
+                            selector: (sContext, model) {
+                              return model.content;
+                            },
+                            builder: (_, content, widget) {
                               print(
                                   "ListView重绘${DateTime.now().millisecondsSinceEpoch}");
                               return SliverPadding(
@@ -74,8 +78,8 @@ class _TodayPageState extends State<TodayPage>
                                 sliver: SliverList(
                                     delegate: SliverChildBuilderDelegate(
                                         (buildcontext, index) {
-                                  return ContentItemWidget(model.content[index]);
-                                }, childCount: model.content.length)),
+                                  return ContentItemWidget(content[index]);
+                                }, childCount: content.length)),
                               );
                             },
                           ),

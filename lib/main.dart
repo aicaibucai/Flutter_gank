@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
     return Consumer<ThemeViewModel>(
       builder: (_, model, widget) {
         return MaterialApp(
-          title: 'Flutter Demo',
+          title: 'Gank App Demo',
           initialRoute: "/",
           theme: ThemeData(
             appBarTheme: AppBarTheme(color: model.themeModel.appBarTheme),

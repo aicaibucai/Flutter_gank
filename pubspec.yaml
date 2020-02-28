@@ -33,7 +33,7 @@ dependencies:
   #SVG资源加载
   flutter_svg: ^0.15.0
   #webview
-  webview_flutter: ^0.3.19+5
+  webview_flutter: 0.3.19+8
 
 #  #dart 代码生成框架
 #  json_annotation: ^3.0.1
