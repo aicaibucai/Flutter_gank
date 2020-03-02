@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class CircleColorPickWidget extends StatefulWidget {
+  Color _selectColor;
+  CircleColorPickWidget({Color selectColor}):_selectColor=selectColor;
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -14,8 +16,8 @@ class CircleColorPickWidget extends StatefulWidget {
 class ColorPickState extends State<CircleColorPickWidget> {
   bool _isTap = false;
   Offset _pointOffset = Offset(100 - 5.0, 100 - 5.0);
-  Color _selectColor = Colors.white;
 
+  Color _selectColor = Colors.white;
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -48,17 +50,17 @@ class ColorPickState extends State<CircleColorPickWidget> {
               onTapDown: (td) {
                 _isTap = true;
                 colorPickPoint(
-                    td.localPosition, _pointOffset, Offset(100, 100), 100 - 5.0);
+                    td.localPosition, _pointOffset, Offset(100, 100), 100.0);
               },
               onPanUpdate: (pu) {
                 _isTap = true;
                 colorPickPoint(
-                    pu.localPosition, _pointOffset, Offset(100, 100), 100 - 5.0);
+                    pu.localPosition, _pointOffset, Offset(100, 100), 100.0);
               },
               onTapUp: (tu) {
                 _isTap = false;
                 colorPickPoint(
-                    tu.localPosition, _pointOffset, Offset(100, 100), 100 - 5.0);
+                    tu.localPosition, _pointOffset, Offset(100, 100), 100.0);
               },
             ),
             Container(
@@ -82,7 +84,26 @@ class ColorPickState extends State<CircleColorPickWidget> {
     return HSVColor.fromAHSV(1.0, hsv[0], hsv[1], hsv[2]).toColor();
   }
 
-
+  void colorToPotint(Color color,Offset circleCenter,double radius) {
+    List<double> hsv = [0.0, 0.0, 1.0];
+    HSVColor hsvColor= HSVColor.fromColor(color);
+    hsv[0]=hsvColor.hue;
+    hsv[1]=hsvColor.saturation;
+    double r = hsv[1] * radius;
+    double radian = ((hsv[0]) / (180.0 * pi)).toDouble();
+    double x=(r * cos(radian) + circleCenter.dx);
+    double y=(-r * sin(radian) + circleCenter.dy);
+    x=x-circleCenter.dx;
+    y=y-circleCenter.dy;
+    double pr=sqrt(x*x+y*y);
+    if (pr > radius) {
+      x *= radius / pr;
+      y *= radius / pr;
+    }
+    x=x+circleCenter.dx;
+    y=y+circleCenter.dy;
+    print("Potint--->x:$x,------>y:$y");
+  }
 
   void colorPickPoint(Offset localeOffset, Offset selectOffset,
       Offset circleCenter, var radius) {
@@ -93,6 +114,8 @@ class ColorPickState extends State<CircleColorPickWidget> {
       _pointOffset = Offset(localeOffset.dx - 5, localeOffset.dy - 5);
       _selectColor = getColorAtPoint(_pointOffset, circleCenter, radius);
       setState(() {});
+      print("TapPotint--->x:${localeOffset.dx},------>y:${localeOffset.dy}");
+      colorToPotint(_selectColor, Offset(100, 100), 100);
     } else{
 
     }

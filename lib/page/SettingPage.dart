@@ -101,7 +101,7 @@ class ColorPickDialog extends Dialog {
     return Center(child: Container(
       width: 400,
       height: 400,
-      child: CircleColorPickWidget(),
+      child: CircleColorPickWidget(selectColor: Colors.red,),
       decoration: BoxDecoration(color: Colors.white),
     ),);
   }
