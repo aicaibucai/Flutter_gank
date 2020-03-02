@@ -5,7 +5,20 @@ import 'package:flutter/widgets.dart';
 
 class CircleColorPickWidget extends StatefulWidget {
   Color _selectColor;
-  CircleColorPickWidget({Color selectColor}):_selectColor=selectColor;
+  double _width;
+  double _height;
+  double _selectPointRadius;
+
+  CircleColorPickWidget(
+      {Color selectColor,
+      double width = 200,
+      double height = 200,
+      double selectPointRadius = 5})
+      : _selectColor = selectColor,
+        _width = width,
+        _height = height,
+        _selectPointRadius = selectPointRadius;
+
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -15,15 +28,25 @@ class CircleColorPickWidget extends StatefulWidget {
 
 class ColorPickState extends State<CircleColorPickWidget> {
   bool _isTap = false;
-  Offset _pointOffset = Offset(100 - 5.0, 100 - 5.0);
-
+  Offset _pointOffset = Offset(0, 0);
+  Offset centerPostion = Offset(0, 0);
   Color _selectColor = Colors.white;
+  double _radius=0.0;
+  @override
+  void initState() {
+    super.initState();
+    centerPostion = Offset(widget._width / 2, widget._height / 2);
+    _pointOffset = Offset(centerPostion.dx - widget._selectPointRadius,
+        centerPostion.dy - widget._selectPointRadius);
+    _radius=min(widget._width, widget._height)/2;
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Container(
-        width: 200,
-        height: 200,
+        width: widget._width,
+        height: widget._height,
         child: Column(
           children: <Widget>[
             GestureDetector(
@@ -31,16 +54,17 @@ class ColorPickState extends State<CircleColorPickWidget> {
                 children: <Widget>[
                   CustomPaint(
                     painter: CircleColorPainter(),
-                    size: Size(200, 200),
+                    size: Size(widget._width, widget._height),
                   ),
                   Positioned(
                       top: _pointOffset.dy,
                       left: _pointOffset.dx,
                       child: Container(
-                        height: 10,
-                        width: 10,
+                        height: widget._selectPointRadius * 2,
+                        width: widget._selectPointRadius * 2,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
+                          borderRadius:
+                              BorderRadius.circular(widget._selectPointRadius),
                           border: Border.fromBorderSide(
                               BorderSide(color: Colors.black)),
                         ),
@@ -50,17 +74,17 @@ class ColorPickState extends State<CircleColorPickWidget> {
               onTapDown: (td) {
                 _isTap = true;
                 colorPickPoint(
-                    td.localPosition, _pointOffset, Offset(100, 100), 100.0);
+                    td.localPosition, _pointOffset, centerPostion, _radius);
               },
               onPanUpdate: (pu) {
                 _isTap = true;
                 colorPickPoint(
-                    pu.localPosition, _pointOffset, Offset(100, 100), 100.0);
+                    pu.localPosition, _pointOffset, centerPostion, _radius);
               },
               onTapUp: (tu) {
                 _isTap = false;
                 colorPickPoint(
-                    tu.localPosition, _pointOffset, Offset(100, 100), 100.0);
+                    tu.localPosition, _pointOffset, centerPostion, _radius);
               },
             ),
             Container(
@@ -84,24 +108,26 @@ class ColorPickState extends State<CircleColorPickWidget> {
     return HSVColor.fromAHSV(1.0, hsv[0], hsv[1], hsv[2]).toColor();
   }
 
-  void colorToPotint(Color color,Offset circleCenter,double radius) {
-    List<double> hsv = [0.0, 0.0, 1.0];
-    HSVColor hsvColor= HSVColor.fromColor(color);
-    hsv[0]=hsvColor.hue;
-    hsv[1]=hsvColor.saturation;
-    double r = hsv[1] * radius;
-    double radian = ((hsv[0]) / (180.0 * pi)).toDouble();
-    double x=(r * cos(radian) + circleCenter.dx);
-    double y=(-r * sin(radian) + circleCenter.dy);
-    x=x-circleCenter.dx;
-    y=y-circleCenter.dy;
-    double pr=sqrt(x*x+y*y);
-    if (pr > radius) {
-      x *= radius / pr;
-      y *= radius / pr;
+  void colorToPoint(Color color, Offset circleCenter, double radius) {
+    //RGB转成HSV
+    HSVColor hsvColor = HSVColor.fromColor(color);
+    //获取点到圆心的距离
+    double r = hsvColor.saturation * radius;
+    //获取夹角，未知atan2的角度转换是如何的
+    double radian = hsvColor.hue / -180.0 * pi;
+    //获取到以圆心为坐标轴的(0,0)坐标的坐标轴，(x,y)则是此坐标轴上的点。
+    double x = (r * cos(radian));
+    double y = (-r * sin(radian));
+    //由于x,y直接是以圆心为坐标轴的坐标，所以(x,y)直接运算即可得到距离
+    double tr = sqrt(x * x + y * y);
+    //判断(x,y)的距离是否超出半径
+    if (tr > radius) {
+      x *= radius / tr;
+      y *= radius / tr;
     }
-    x=x+circleCenter.dx;
-    y=y+circleCenter.dy;
+    //转换出屏幕坐标的实际位置
+    x = x + circleCenter.dx+widget._selectPointRadius;
+    y = y + circleCenter.dy+widget._selectPointRadius;
     print("Potint--->x:$x,------>y:$y");
   }
 
@@ -111,14 +137,12 @@ class ColorPickState extends State<CircleColorPickWidget> {
         pow((circleCenter.dx - localeOffset.dx).abs(), 2) +
             pow((circleCenter.dy - localeOffset.dy).abs(), 2));
     if (centerDistance <= radius) {
-      _pointOffset = Offset(localeOffset.dx - 5, localeOffset.dy - 5);
+      _pointOffset = Offset(localeOffset.dx - widget._selectPointRadius, localeOffset.dy - widget._selectPointRadius);
       _selectColor = getColorAtPoint(_pointOffset, circleCenter, radius);
       setState(() {});
       print("TapPotint--->x:${localeOffset.dx},------>y:${localeOffset.dy}");
-      colorToPotint(_selectColor, Offset(100, 100), 100);
-    } else{
-
-    }
+      colorToPoint(_selectColor, circleCenter, radius);
+    } else {}
   }
 }
 
@@ -133,8 +157,7 @@ class CircleColorPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     // TODO: implement paint
-    double circleSize =
-        (size.width <= size.height ? size.width : size.height) / 2;
+    double circleSize = min(size.width, size.height) / 2;
     var rect = Rect.fromLTRB(0.0, 0.0, size.width, size.height);
     _circleColorPaint.shader = _circleShader.createShader(rect);
     _selectPointPaint.shader = _selectPointShader.createShader(rect);
