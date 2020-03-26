@@ -4,7 +4,7 @@ class BaseEntity<T> {
   List<String> category;
   T results;
   bool error;
-
+  int count;
   BaseEntity(this.category, this.results, this.error);
 
   BaseEntity.fromJson(Map<String, dynamic> json) {
@@ -17,6 +17,9 @@ class BaseEntity<T> {
     }
     if (json['results'] != null) {
       results = generateOBJ(json['results']);
+    }
+    if(json['count']!=null){
+      count=json['count'];
     }
   }
 

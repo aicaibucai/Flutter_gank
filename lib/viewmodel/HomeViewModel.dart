@@ -43,11 +43,11 @@ class HomeModel extends BaseViewModel {
   void initPage() {
     pages
       ..add(TodayPage())
-//      ..add(Navigator(onGenerateRoute: (setting) {
-//        return MaterialPageRoute(
-//            builder: (build) => ChannelPage(), settings: setting);
-//      }))
-      ..add(ChannelPage())
+      ..add(Navigator(onGenerateRoute: (setting) {
+        return MaterialPageRoute(
+            builder: (build) => ChannelPage(), settings: setting);
+      }))
+//      ..add(ChannelPage())
       ..add(SettingPage());
   }
 

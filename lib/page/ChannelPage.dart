@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import 'CategoryPage.dart';
 import 'HomePage.dart';
+import 'SearchPage.dart';
 
 class ChannelPage extends StatefulWidget {
   ChannelPage({Key key}) : super(key: key);
@@ -29,6 +30,16 @@ class _ChannelState extends State<ChannelPage> {
           appBar: AppBar(
             title: Text(_channelViewModel.title),
             centerTitle: true,
+            actions: <Widget>[
+              IconButton(
+                  icon: Icon(Icons.search),
+                  onPressed: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (rbcontext) {
+                      return SearchPage();
+                    }));
+                  })
+            ],
           ),
           body: Container(
             child: GridView.builder(

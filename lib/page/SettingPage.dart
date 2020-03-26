@@ -1,8 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_gank_app/Config/ThemeConfig.dart';
 import 'package:flutter_gank_app/view/ColorPickWidget.dart';
+import 'package:flutter_gank_app/view/SpinnerWidget.dart';
 import 'package:flutter_gank_app/viewmodel/ThemeViewModel.dart';
 import 'package:provider/provider.dart';
 
@@ -17,12 +20,15 @@ class SettingPage extends StatefulWidget {
 }
 
 class SettingState extends State<SettingPage> {
+  String selectItem = "1";
+
   @override
   Widget build(BuildContext context) {
     ThemeData themeData = Theme.of(context);
     // TODO: implement build
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         title: Text("设置"),
       ),
       body: Container(
@@ -87,6 +93,43 @@ class SettingState extends State<SettingPage> {
                   child: ColorPickDialog(),
                 );
               },
+            ),
+            InkWell(
+              child: Container(
+                decoration: BoxDecoration(color: Colors.white),
+                padding:
+                    EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        "popupWindow测试",
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ),
+                    DropdownButton(
+                        value: selectItem,
+                        underline: Container(),
+                        items: ["1", "2", "3", "4", "5", "6"]
+                            .map<DropdownMenuItem>((e) {
+                          return DropdownMenuItem(
+                            child: Text(e),
+                            value: e,
+                          );
+                        }).toList(),
+                        onChanged: (item) {
+                          setState(() {
+                            selectItem = item;
+                          });
+                          log(selectItem);
+                        })
+                  ],
+                ),
+              ),
+              onTap: () {
+//                print(
+//                    "ThemeViewModel:${Provider.of<ThemeViewModel>(context, listen: false).primaryColor}");
+              },
             )
           ],
         ),
@@ -98,12 +141,16 @@ class SettingState extends State<SettingPage> {
 class ColorPickDialog extends Dialog {
   @override
   Widget build(BuildContext context) {
-    return Center(child: Container(
-      width: 400,
-      height: 400,
-      child: CircleColorPickWidget(selectColor: Colors.red,),
-      decoration: BoxDecoration(color: Colors.white),
-    ),);
+    return Center(
+      child: Container(
+        width: 400,
+        height: 400,
+        child: CircleColorPickWidget(
+          selectColor: Colors.red,
+        ),
+        decoration: BoxDecoration(color: Colors.white),
+      ),
+    );
   }
 }
 

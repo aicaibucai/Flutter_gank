@@ -1,12 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_gank_app/net/ApiManage.dart';
+import 'package:flutter_gank_app/net/entity/BaseEntity.dart';
 import 'package:flutter_gank_app/net/entity/TodayEntity.dart';
 import 'package:flutter_gank_app/utils/DateUtil.dart';
 
 import 'BaseViewModel.dart';
 
 class TodayViewModel extends BaseViewModel {
-
   String _allSelectTag = "全部";
   Map<String, bool> _category = Map();
 
@@ -31,10 +31,11 @@ class TodayViewModel extends BaseViewModel {
   DateTime get selectDate => _selectDate;
   bool isToday = true;
   String title = "今日";
+
   set selectDate(DateTime value) {
     _selectDate = value;
   }
-  
+
   @override
   void initData() {
     var now = DateTime.now();
@@ -42,8 +43,8 @@ class TodayViewModel extends BaseViewModel {
     loadToday();
   }
 
-  void refreshToday() {
-    content=List<TodayEntity>();
+  void refreshContent() {
+    content = List<TodayEntity>();
     title = isToday ? "今日" : selectDate.toSimpleDate();
     List<String> tags = List();
     _category.forEach((key, value) {
@@ -65,43 +66,60 @@ class TodayViewModel extends BaseViewModel {
         }
       }
     }
-    notifyListeners();
   }
 
-  void loadToday({bool isInit=true}) async {
+  void refreshResult() async {
+    if (isToday) {
+      await loadToday(isInit: false);
+    } else {
+      String year = selectDate.year.toString();
+      String month = selectDate.month.toString();
+      String day = selectDate.day.toString();
+      await loadStringDate(year, month, day, isInit: false);
+    }
+  }
+
+  void loadToday({bool isInit = true}) async {
     status = BaseViewModel.LOADING;
-    if(isInit){
+    if (isInit) {
       notifyListeners();
     }
-    var result = await ApiManage.instance.getToday().whenComplete(() {
-      status = BaseViewModel.NORMAL;
+    var result = await ApiManage.instance.getToday().then((data) {
+      if (data.error) {
+        status = BaseViewModel.ERROR;
+      } else {
+        status = BaseViewModel.NORMAL;
+      }
+      return data;
     }).catchError((e) {
-      if(e is DioErrorType){
+      if (e is DioErrorType) {
         status = BaseViewModel.NETWORK_ERROR;
-      }else{
+      } else {
         status = BaseViewModel.ERROR;
       }
     });
-    if(status==BaseViewModel.NORMAL){
-      _category.clear();
-      _category[_allSelectTag] = true;
-      if (result!=null&&result.error == false) {
-        if (result.category != null) {
-          result.category.forEach((cate) {
-            if (cate != "福利") _category[cate] = false;
-          });
-        }
-        if (result.results == null || result.results.length == 0) {
-          status = BaseViewModel.EMPTY;
-        }
-        _categoryContent = result.results;
-        refreshToday();
-      } else {
-        status = BaseViewModel.ERROR;
-        notifyListeners();
+    if (result != null && status == BaseViewModel.NORMAL) {
+      _gankContentHandel(result);
+    }
+    notifyListeners();
+  }
+
+  void _gankContentHandel(BaseEntity<Map<String, List<TodayEntity>>> result) {
+    _category.clear();
+    _category[_allSelectTag] = true;
+    if (result != null && result.error == false) {
+      if (result.category != null) {
+        result.category.forEach((cate) {
+          if (cate != "福利") _category[cate] = false;
+        });
       }
-    }else{
-      notifyListeners();
+      if (result.results == null || result.results.length == 0) {
+        status = BaseViewModel.EMPTY;
+      }
+      _categoryContent = result.results;
+      refreshContent();
+    } else {
+      status = BaseViewModel.ERROR;
     }
   }
 
@@ -109,9 +127,10 @@ class TodayViewModel extends BaseViewModel {
     _category.forEach((key, value) {
       _category[key] = false;
     });
-     _category[_allSelectTag] = true;
+    _category[_allSelectTag] = true;
     _selectSize = 1;
-    refreshToday();
+    refreshContent();
+    notifyListeners();
   }
 
   void selectTag(String tag, bool select) {
@@ -119,7 +138,8 @@ class TodayViewModel extends BaseViewModel {
     _category[tag] = select;
     _selectSize =
         _category.values.toList().where((bool) => bool).toList().length;
-    refreshToday();
+    refreshContent();
+    notifyListeners();
   }
 
   void loadDate(DateTime dateTime) async {
@@ -127,27 +147,30 @@ class TodayViewModel extends BaseViewModel {
         dateTime.day.toString());
   }
 
-  void loadStringDate(String year, String month, String day) async {
+  void loadStringDate(String year, String month, String day,
+      {bool isInit = true}) async {
     status = BaseViewModel.LOADING;
-    notifyListeners();
+    if (isInit) {
+      notifyListeners();
+    }
     var result =
-        await ApiManage.instance.getDate(year, month, day).whenComplete(() {
-      status = BaseViewModel.NORMAL;
+        await ApiManage.instance.getDate(year, month, day).then((data) {
+      if (data.error) {
+        status = BaseViewModel.ERROR;
+      } else {
+        status = BaseViewModel.NORMAL;
+      }
+      return data;
     }).catchError((e) {
-      status = BaseViewModel.ERROR;
+      if (e is DioErrorType) {
+        status = BaseViewModel.NETWORK_ERROR;
+      } else {
+        status = BaseViewModel.ERROR;
+      }
     });
-    _category.clear();
-    _category[_allSelectTag] = true;
-    if (result.category != null) {
-      result.category.forEach((cate) {
-        if (cate != "福利") _category[cate] = false;
-      });
+    if (result != null && status == BaseViewModel.NORMAL) {
+      _gankContentHandel(result);
     }
-    if (result.results == null || result.results.length == 0) {
-      status = BaseViewModel.EMPTY;
-    }
-    _categoryContent = result.results;
-    refreshToday();
+    notifyListeners();
   }
 }
-

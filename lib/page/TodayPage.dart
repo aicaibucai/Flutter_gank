@@ -90,7 +90,26 @@ class _TodayPageState extends State<TodayPage>
                     break;
                   case BaseViewModel.ERROR:
                     child = Center(
-                      child: Text("Error"),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Text("系统错误,请点击重试按钮重试"),
+                          MaterialButton(
+                            onPressed: () {
+                              _viewModel.refreshResult();
+                            },
+                            child: Text(
+                              "重试",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            color: Colors.blue,
+                            shape: RoundedRectangleBorder(
+                                side: BorderSide.none,
+                                borderRadius:
+                                BorderRadius.all(Radius.circular(10))),
+                          )
+                        ],
+                      ),
                     );
                     break;
                   case BaseViewModel.NETWORK_ERROR:
@@ -101,7 +120,7 @@ class _TodayPageState extends State<TodayPage>
                           Text("网络错误，请点击重试按钮重试。"),
                           MaterialButton(
                             onPressed: () {
-                              _viewModel.loadToday();
+                              _viewModel.refreshResult();
                             },
                             child: Text(
                               "重试",
@@ -144,7 +163,7 @@ class _TodayPageState extends State<TodayPage>
                 return RefreshIndicator(
                     child: child,
                     onRefresh: () async =>
-                        await _viewModel.loadToday(isInit: false));
+                      await  _viewModel.refreshResult());
               }));
         }));
   }

@@ -49,9 +49,19 @@ class ApiManage {
   }
 
   Future<BaseEntity<List<TodayEntity>>> getCategoryContent(
-      String category, int size, int pagenum) async {
+      String category, int count, int pagenum) async {
     return await _dio
-        .get<Map<String, dynamic>>("data/${category}/${size}/${pagenum}")
+        .get<Map<String, dynamic>>("data/$category/$count/$pagenum")
+        .then((value) {
+      return BaseEntity<List<TodayEntity>>.fromJson(value.data);
+    });
+  }
+
+  Future<BaseEntity<List<TodayEntity>>> searchCategory(
+      String query, String category, int count, int pagenum) async {
+    return await _dio
+        .get<Map<String, dynamic>>(
+            "search/query/$query/category/$category/count/$count/page/$pagenum")
         .then((value) {
       return BaseEntity<List<TodayEntity>>.fromJson(value.data);
     });
