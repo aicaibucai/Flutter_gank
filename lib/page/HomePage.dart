@@ -78,7 +78,8 @@ class HomeSate extends State<HomePage> {
                   print("HomePage:back press");
                   if (_homeModel.currentPage is Navigator) {
                     print("HomePage:嵌套路由返回");
-                    if (Navigator.of(_homeModel.currentContext).canPop()) {
+                    if (_homeModel.currentContext != null &&
+                        Navigator.of(_homeModel.currentContext).canPop()) {
                       Navigator.of(_homeModel.currentContext).pop();
                       return false;
                     } else {
