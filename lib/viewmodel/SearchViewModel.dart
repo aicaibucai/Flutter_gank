@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_gank_app/net/ApiManage.dart';
 import 'package:flutter_gank_app/net/entity/TodayEntity.dart';
 import 'package:flutter_gank_app/viewmodel/BaseViewModel.dart';
@@ -16,8 +17,30 @@ class SearchViewModel extends BaseViewModel {
   ];
   int categoryIndex = 0;
   List<TodayEntity> content;
+  String _searchContent = "";
   int count;
   int pageNum;
+  TextEditingController _searchController = TextEditingController()
+    ..addListener(() {});
+
+  String get searchContent => _searchContent;
+
+  void changeTag(int index) {
+    categoryIndex = index;
+    notifyListeners();
+  }
+
+  TextEditingController get searchController => _searchController;
+
+  void init() {
+    _searchController
+      ..addListener(() {
+        if (searchContent != _searchController.text) {
+          _searchContent = _searchController.text;
+          notifyListeners();
+        }
+      });
+  }
 
   void search(String query) async {
     status = BaseViewModel.LOADING;
@@ -31,11 +54,7 @@ class SearchViewModel extends BaseViewModel {
       if (result.error) {
         status = BaseViewModel.ERROR;
         notifyListeners();
-      } else {
-
-      }
-    } else {
-
-    }
+      } else {}
+    } else {}
   }
 }

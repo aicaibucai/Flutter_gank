@@ -18,12 +18,17 @@ class ChannelPage extends StatefulWidget {
   }
 }
 
-class _ChannelState extends State<ChannelPage> {
+class _ChannelState extends State<ChannelPage>
+    with AutomaticKeepAliveClientMixin {
   ChannelViewModel _channelViewModel;
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
+    print("ChannelPageBuild:${DateTime.now().toIso8601String()}");
+    super.build(context);
+    var model = Provider.of<HomeModel>(context,listen: false);
+    model.currentContext=context;
     return ChangeNotifierProvider<ChannelViewModel>.value(
         value: _channelViewModel,
         child: Scaffold(
@@ -77,4 +82,8 @@ class _ChannelState extends State<ChannelPage> {
     super.initState();
     _channelViewModel = ChannelViewModel()..initData();
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

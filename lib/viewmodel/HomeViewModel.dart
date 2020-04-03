@@ -33,6 +33,15 @@ class HomeModel extends BaseViewModel {
     _context = value;
   }
 
+  BuildContext _currentContext =null;
+
+
+  BuildContext get currentContext => _currentContext;
+
+  set currentContext(BuildContext value) {
+    _currentContext = value;
+  }
+
   @override
   void initData() {
     status = BaseViewModel.NORMAL;
@@ -50,6 +59,11 @@ class HomeModel extends BaseViewModel {
 //      ..add(ChannelPage())
       ..add(SettingPage());
   }
+
+  Widget getPage(index) {
+    return pages[index];
+  }
+
 
   void selectIndex(var index, bool isNavigation) {
     _currentIndex = index;

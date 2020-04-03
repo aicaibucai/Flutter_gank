@@ -3,6 +3,7 @@ import 'package:flutter_gank_app/view/ContentItemWidget.dart';
 import 'package:flutter_gank_app/viewmodel/BaseViewModel.dart';
 import 'package:flutter_gank_app/viewmodel/ChannelContentViewModel.dart';
 import 'package:flutter_gank_app/viewmodel/ChannelViewModel.dart';
+import 'package:flutter_gank_app/viewmodel/HomeViewModel.dart';
 import 'package:provider/provider.dart';
 
 class CategoryPage extends StatefulWidget {
@@ -17,14 +18,20 @@ class CategoryPage extends StatefulWidget {
   }
 }
 
-class _CategoryState extends State<CategoryPage> {
+class _CategoryState extends State<CategoryPage>
+    with AutomaticKeepAliveClientMixin {
   ChannelContentViewModel _model;
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
+    super.build(context);
+    var model = Provider.of<HomeModel>(context, listen: false);
+    model.currentContext = context;
+    print("ModelInit:${model.pages.toString()}");
     return WillPopScope(
       onWillPop: () async {
+        print("CategoryPage:back press");
         return false;
       },
       child: ChangeNotifierProvider<ChannelContentViewModel>(
@@ -118,4 +125,8 @@ class _CategoryState extends State<CategoryPage> {
   void initState() {
     super.initState();
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

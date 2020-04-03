@@ -94,43 +94,43 @@ class SettingState extends State<SettingPage> {
                 );
               },
             ),
-            InkWell(
-              child: Container(
-                decoration: BoxDecoration(color: Colors.white),
-                padding:
-                    EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Text(
-                        "popupWindow测试",
-                        style: TextStyle(fontSize: 18),
-                      ),
-                    ),
-                    DropdownButton(
-                        value: selectItem,
-                        underline: Container(),
-                        items: ["1", "2", "3", "4", "5", "6"]
-                            .map<DropdownMenuItem>((e) {
-                          return DropdownMenuItem(
-                            child: Text(e),
-                            value: e,
-                          );
-                        }).toList(),
-                        onChanged: (item) {
-                          setState(() {
-                            selectItem = item;
-                          });
-                          log(selectItem);
-                        })
-                  ],
-                ),
-              ),
-              onTap: () {
-//                print(
-//                    "ThemeViewModel:${Provider.of<ThemeViewModel>(context, listen: false).primaryColor}");
-              },
-            )
+//            InkWell(
+//              child: Container(
+//                decoration: BoxDecoration(color: Colors.white),
+//                padding:
+//                    EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
+//                child: Row(
+//                  children: <Widget>[
+//                    Expanded(
+//                      child: Text(
+//                        "popupWindow测试",
+//                        style: TextStyle(fontSize: 18),
+//                      ),
+//                    ),
+//                    DropdownButton(
+//                        value: selectItem,
+//                        underline: Container(),
+//                        items: ["1", "2", "3", "4", "5", "6"]
+//                            .map<DropdownMenuItem>((e) {
+//                          return DropdownMenuItem(
+//                            child: Text(e),
+//                            value: e,
+//                          );
+//                        }).toList(),
+//                        onChanged: (item) {
+//                          setState(() {
+//                            selectItem = item;
+//                          });
+//                          log(selectItem);
+//                        })
+//                  ],
+//                ),
+//              ),
+//              onTap: () {
+////                print(
+////                    "ThemeViewModel:${Provider.of<ThemeViewModel>(context, listen: false).primaryColor}");
+//              },
+//            )
           ],
         ),
       ),
