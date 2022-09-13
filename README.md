@@ -1,18 +1,3 @@
-# flutter_gank_app
-
-gank.io study app
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
 # Flutter_gank
-Flutter构建的Gank客户端，用于学习Flutter,（代码辣鸡，请见谅）
+由于gank.io已经没了，我又懒得新开，所以这个 源就改为WanAndroid和用GetX重新做一个,
+目前来说是没有UI和其他规划的,因为我目前来说还是拿来练手的。\
